@@ -1,40 +1,44 @@
+// filepath: frontend/src/App.js
 import React, { useEffect, useState } from 'react';
-import axios from 'axios';
-import io from 'socket.io-client';
+import { getLiveScores } from './apiService';
+import './index.css';
 
-const socket = io('http://localhost:5000'); // Backend URL
-
-function App() {
-  const [scores, setScores] = useState([]);
+const App = () => {
+  const [liveScores, setLiveScores] = useState([]);
 
   useEffect(() => {
-    // Fetch initial scores
-    axios.get('http://localhost:5000/api/scores')
-      .then((response) => setScores(response.data))
-      .catch((error) => console.error(error));
-
-    // Listen for real-time updates
-    socket.on('scoreUpdate', (updatedScores) => {
-      setScores(updatedScores);
-    });
-
-    return () => {
-      socket.disconnect();
+    const fetchLiveScores = async () => {
+      try {
+        const data = await getLiveScores();
+        setLiveScores(data.matches);
+      } catch (error) {
+        console.error('Error fetching live scores:', error);
+      }
     };
+
+    fetchLiveScores();
   }, []);
 
   return (
-    <div className="App">
-      <h1>Live Scores</h1>
-      <ul>
-        {scores.map((score, index) => (
-          <li key={index}>
-            {score.team1} vs {score.team2}: {score.score}
-          </li>
-        ))}
-      </ul>
+    <div className="container mx-auto p-4">
+      <h1 className="text-2xl font-bold mb-4">Live Football Scores</h1>
+      {liveScores.length > 0 ? (
+        <ul>
+          {liveScores.map((match) => (
+            <li key={match.id} className="mb-2 p-2 border rounded">
+              <div className="flex justify-between">
+                <span>{match.homeTeam.name}</span>
+                <span>{match.score.fullTime.homeTeam} - {match.score.fullTime.awayTeam}</span>
+                <span>{match.awayTeam.name}</span>
+              </div>
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <p>No live matches at the moment.</p>
+      )}
     </div>
   );
-}
+};
 
 export default App;
