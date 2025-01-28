@@ -1,6 +1,6 @@
-// filepath: frontend/src/App.js
 import React, { useEffect, useState } from 'react';
 import { getLiveScores } from './apiService';
+import 'bootstrap/dist/css/bootstrap.min.css';
 import './index.css';
 
 const App = () => {
@@ -10,7 +10,7 @@ const App = () => {
     const fetchLiveScores = async () => {
       try {
         const data = await getLiveScores();
-        setLiveScores(data.matches);
+        setLiveScores(data);
       } catch (error) {
         console.error('Error fetching live scores:', error);
       }
@@ -20,22 +20,20 @@ const App = () => {
   }, []);
 
   return (
-    <div className="container mx-auto p-4">
-      <h1 className="text-2xl font-bold mb-4">Live Football Scores</h1>
+    <div className="container mt-4">
+      <h1 className="text-center mb-4">Live Football Scores</h1>
       {liveScores.length > 0 ? (
-        <ul>
+        <ul className="list-group">
           {liveScores.map((match) => (
-            <li key={match.id} className="mb-2 p-2 border rounded">
-              <div className="flex justify-between">
-                <span>{match.homeTeam.name}</span>
-                <span>{match.score.fullTime.homeTeam} - {match.score.fullTime.awayTeam}</span>
-                <span>{match.awayTeam.name}</span>
-              </div>
+            <li key={match.fixture.id} className="list-group-item d-flex justify-content-between align-items-center">
+              <span>{match.teams.home.name}</span>
+              <span>{match.goals.home} - {match.goals.away}</span>
+              <span>{match.teams.away.name}</span>
             </li>
           ))}
         </ul>
       ) : (
-        <p>No live matches at the moment.</p>
+        <p className="text-center">No live matches at the moment.</p>
       )}
     </div>
   );
